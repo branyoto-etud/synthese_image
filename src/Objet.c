@@ -45,6 +45,10 @@ Objet* Cree_sphere_can(G3Xcolor col, Material mat) {
   return obj;
 }
 
+static bool point_in_cube_can(G3Xpoint A) {
+  return MAX3(fabs(A.x), fabs(A.y), fabs(A.z)) <= 1. + 1.e-8;
+}
+
 bool RayonInterCube(G3Xpoint* I, G3Xvector* N, G3Xpoint A, G3Xvector u) {
   static G3Xvector CN[6] = {{ 1, 0, 0}, { 0, 1, 0}, { 0, 0, 1},
                             {-1, 0, 0}, { 0,-1, 0}, { 0, 0,-1}};
@@ -65,7 +69,7 @@ bool RayonInterCube(G3Xpoint* I, G3Xvector* N, G3Xpoint A, G3Xvector u) {
     I->y = A.y + t * u.y;
     I->z = A.z + t * u.z;
     *N = CN[i];
-
+    if (! point_in_cube_can(*I)) continue;
     return true;
   }
   return false;
