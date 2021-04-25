@@ -59,7 +59,7 @@ void Camera_setup(Cam* camera, double theta, double phi, double dist, G3Xpoint t
   for (x=0;x<camera->nbl; x++) {
     for (y=0;y<camera->nbc; y++)
     {
-      G3Xpoint p = (G3Xpoint) {(x - camera->nbl / 2.)*xpas, (y - camera->nbc / 2.)*ypas, 0};
+      G3Xpoint p = (G3Xpoint) {(.5 + x - camera->nbl / 2.)*xpas, (.5 + y - camera->nbc / 2.)*ypas, 0};
       p = g3x_ProdHMatPoint(camera->Md, p);
       G3Xvector v = g3x_SetVect(o, p);
       Rayon R = Cree_Rayon(p, v);
@@ -68,7 +68,7 @@ void Camera_setup(Cam* camera, double theta, double phi, double dist, G3Xpoint t
       if (R.distance >= DBL_MAX-1) {
         R.color = ((x%4<2 && y%4<2) || (x%4>=2 && y%4>=2)? G3Xk_c : G3Xw_c);
       }
-      /*Draw_Rayon(&R);*/
+      /* Draw_Rayon(&R); */
       *col = R.color;
       col++;
     }
