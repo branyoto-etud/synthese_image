@@ -12,29 +12,45 @@ Rayon Cree_Rayon(G3Xpoint A, G3Xvector u) {
   return R;
 }
 
+void RayIntersectWith(Rayon *R, Objet* o, G3Xpoint *I, G3Xvector *N) {
+  /* Projetté du rayon dans l'espace canonique */
+  G3Xpoint  A = g3x_ProdHMatPoint (o->Mi, R->origine  );
+  G3Xvector u = g3x_ProdHMatVector(o->Mi, R->direction);
+  g3x_Normalize(&u);
+
+  G3Xpoint J;  /* Point d'intersection */
+  G3Xvector M; /* Normale au point d'intersection */
+  /* Stop si pas d'intersections */
+  if (!o->inter(&J, &M, A, u)) return;
+
+  double d = g3x_SqrDist(g3x_ProdHMatPoint(o->Md, J), R->origine);
+  /* Stop si trop loin */
+  if (d >= R->distance) return;
+
+  /* Mise à jours du rayon */
+  R->objet    = o;
+  R->distance = d;
+  /* Mise à jours du meilleur point d'intersection et de sa normale */
+  *I = g3x_ProdHMatPoint (o->Md, J);
+  *N = g3x_ProdHMatVector(o->Md, M);
+  g3x_Normalize(N);
+}
+
 void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
-  if (rec == 0) return; /* Not used for the moment */
+  G3Xpoint I; G3Xvector N;
+  Objet* obj = objets;
+
+  if (rec == 0) return;
   rec -= 1;
 
-  Objet* obj = objets;
-  G3Xpoint saveI; G3Xvector saveN;
+  /* Calcul de l'objet le plus proche */
   do {
-    G3Xpoint  A = g3x_ProdHMatPoint (obj->Mi, R->origine  );
-    G3Xvector u = g3x_ProdHMatVector(obj->Mi, R->direction);
-    g3x_Normalize(&u);
-    G3Xpoint I; G3Xvector N;
-    if (obj->inter(&I, &N, A, u)) {
-      double d = g3x_SqrDist(g3x_ProdHMatPoint(obj->Md, I), R->origine);
-      if (d < R->distance) {
-        R->objet    = obj;
-        R->distance =   d;
-        saveI = g3x_ProdHMatPoint (obj->Md, I);
-        saveN = g3x_ProdHMatVector(obj->Md, N);
-        g3x_Normalize(&saveN);
-      }
-    }
+    RayIntersectWith(R, obj, &I, &N);
   } while ((obj = obj->next) != objets);
+
+  /* Si pas d'intersection -> le rayon se perd donc c'est fini */
   if (R->objet == NULL) return;
+
   R->color = R->objet->color;
   /* Si Niveau 0 -> fin */
   if (RAYTRACER_DEG == 0) return;
