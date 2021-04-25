@@ -36,6 +36,8 @@ void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
   } while ((obj = obj->next) != objets);
   if (R->objet == NULL) return;
   R->color = R->objet->color;
+  /* Si Niveau 0 -> fin */
+  if (RAYTRACER_DEG == 0) return;
 }
 
 void Draw_Rayon(Rayon *R) {

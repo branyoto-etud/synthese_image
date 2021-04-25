@@ -4,6 +4,8 @@
 #include <g3x.h>
 #include "Objet.h"
 
+#define RAYTRACER_DEG 1
+
 typedef struct {
   G3Xpoint origine;
   G3Xvector direction;
