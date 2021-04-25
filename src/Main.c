@@ -10,7 +10,7 @@ Cam    camera;
 Objet* objets = NULL;
 
 /* paramètres réglables de la Caméra : position, orientation, focale, résolution */
-double     cam_the=0., cam_phi=PI/4., cam_dis=2., cam_foc=2., cam_res=0.25;
+double     cam_the=0., cam_phi=PI/4., cam_dis=2., cam_foc=2., cam_res=0.8;
 G3Xpoint   cam_tar={0.,0.,0.};
 
 static void addObject(Objet* o) {
