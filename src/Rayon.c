@@ -32,7 +32,7 @@ void RayIntersectWith(Rayon *R, Objet* o, G3Xpoint *I, G3Xvector *N) {
   R->distance = d;
   /* Mise à jours du meilleur point d'intersection et de sa normale */
   *I = g3x_ProdHMatPoint (o->Md, J);
-  *N = g3x_ProdHMatVector(o->Md, M);
+  *N = g3x_ProdHMatVector(o->Mn, M);
   g3x_Normalize(N);
 }
 
