@@ -56,8 +56,7 @@ static void init(void)
 }
 
 /*! la fonction d'affichage !*/
-static void draw()
-{
+static void draw() {
   Objet* o = objets;
   do {
     draw_object(o);
@@ -70,6 +69,7 @@ static void draw()
 /* fonction de sortie */
 static void quit()
 {
+  /* TODO : Free les objets */
   free(camera.col); camera.col=NULL;
 }
 
