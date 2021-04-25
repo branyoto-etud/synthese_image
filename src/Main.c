@@ -55,16 +55,16 @@ static void init(void)
   g3x_CreateScrollv_d("res",&cam_res, 0.0,1.0,1.,"résolution");
 }
 
-/*! la fonction d'initialisation !*/
+/*! la fonction d'affichage !*/
 static void draw()
 {
-  Camera_setup(&camera,cam_the,cam_phi, cam_dis,cam_tar, cam_foc, cam_res, objets);
-  Draw_camera(&camera, cam_dis);
   Objet* o = objets;
   do {
     draw_object(o);
-    o = o->next;
-  } while (o != objets);
+  } while ((o = o->next) != objets);
+
+  Camera_setup(&camera,cam_the,cam_phi, cam_dis,cam_tar, cam_foc, cam_res, objets);
+  Draw_camera(&camera, cam_dis);
 }
 
 /* fonction de sortie */
