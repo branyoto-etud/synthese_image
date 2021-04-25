@@ -30,12 +30,12 @@ static void addObject(Objet* o) {
 static void Init_objets() {
   Objet *S1 = Cree_sphere_can(G3Xr, (Material){.3, .3, .3, .2, 0, 1});
   Objet *S2 = Cree_sphere_can(G3Xb, (Material){.3, .3, .3, .2, 0, 1});
-  Objet *S3 = Cree_sphere_can(G3Xg, (Material){.3, .3, .3, .2, 0, 1});
+  Objet *S3 = Cree_cube_can(G3Xg, (Material){.3, .3, .3, .2, 0, 1});
   translate_objet(S1, 2.5, 2.5, 2.5);
   rescale_objet(S1, 0.2, 0.2, 0.2);
   translate_objet(S2, 0, 0, 0);
   rescale_objet(S2, 0.1, 0.1, 0.1);
-  translate_objet(S3, 0.5, -1.5, 2);
+  translate_objet(S3, 0, 0, -2);
   rescale_objet(S3, 0.25, 0.25, 0.25);
   addObject(S1);
   addObject(S2);
