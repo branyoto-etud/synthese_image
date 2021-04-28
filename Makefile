@@ -26,6 +26,7 @@ install: $(EXEC)
 	mkdir ./bin
 	mv $(EXEC) ./bin
 	make clean
+	./bin/Main
 
 uninstall: mrproper
 	rm -f ./bin/*

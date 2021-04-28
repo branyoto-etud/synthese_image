@@ -17,7 +17,7 @@ Cam Cree_camera_can(void)
 void Camera_setup(Cam* camera, double theta, double phi, double dist, G3Xpoint target,
   double foc, double resol, Objet* objets)
 {
-  G3Xpoint light = (G3Xpoint) {0,0,0};
+  G3Xpoint light = (G3Xpoint) {0,0,1};
   G3Xpoint  pos = (G3Xpoint){ target.x + dist*cos(theta)*sin(phi),
                               target.y + dist*sin(theta)*sin(phi),
                               target.z + dist*cos(phi) };

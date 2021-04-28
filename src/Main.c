@@ -10,7 +10,7 @@ Cam    camera;
 Objet* objets = NULL;
 
 /* paramètres réglables de la Caméra : position, orientation, focale, résolution */
-double     cam_the=0., cam_phi=PI/4., cam_dis=1., cam_foc=4., cam_res=0.8;
+double     cam_the=0.05, cam_phi=-1.20 /*PI/4.*/, cam_dis=1., cam_foc=4., cam_res=0.8;
 G3Xpoint   cam_tar={0.,0.,0.};
 
 static void addObject(Objet* o) {
@@ -28,18 +28,26 @@ static void addObject(Objet* o) {
 }
 
 static void Init_objets() {
-  Objet *S1 = Cree_sphere_can(G3Xr, (Material){.3, .3, .3, .2, 0, 1});
-  Objet *S2 = Cree_sphere_can(G3Xb, (Material){.3, .3, .3, .2, 0, 1});
-  Objet *S3 = Cree_cube_can(G3Xg, (Material){.3, .3, .3, .2, 0, 1});
-  translate_objet(S1, 2.5, 2.5, 2.5);
+  Objet *S1 = Cree_sphere_can(G3Xr, (Material){0.2, .5, 0, 0, 0, 1});
+  Objet *S2 = Cree_sphere_can(G3Xb, (Material){0.2, .5, 0, 0, 0, 1});
+  Objet *S3 = Cree_cube_can(G3Xg, (Material){0.2, .5, 0, 0, 0, 1});
+  Objet *L = Cree_sphere_can(G3Xw, (Material){0.2, .5, 0, 0, 0, 1});
+  Objet *M = Cree_sphere_can(G3Xm_a, (Material){0.2, .5, 0, 0, 0, 1});
   rescale_objet(S1, 0.2, 0.2, 0.2);
-  translate_objet(S2, 0, 0, 0);
   rescale_objet(S2, 0.1, 0.1, 0.1);
-  translate_objet(S3, 0, 0, -2);
-  rescale_objet(S3, 0.25, 0.25, 0.25);
+  rescale_objet(S3, 0.2, 0.2, 0.2);
+  rescale_objet(L, 0.05, 0.05, 0.05);
+  rescale_objet(M, 0.05, 0.05, 0.05);
+  translate_objet(S1, .5, .5, .5);
+  translate_objet(S2, 0, 0, 0);
+  translate_objet(S3, 0, 0, -.6);
+  translate_objet(L, 0, 0, 1);
+  translate_objet(M, 0, 0, 0.8);
   addObject(S1);
   addObject(S2);
   addObject(S3);
+  addObject(L);
+  addObject(M);
 }
 
 
@@ -84,6 +92,7 @@ int main(int argc, char **argv)
   g3x_SetPerspective(40.,100.,1.);
 
   g3x_SetCameraSpheric(0.,PI/4.,5.,(G3Xpoint){0.,0.,0.});
+  g3x_SetLightCartesian((G3Xpoint) {0, 0, 1});
 
 	g3x_SetInitFunction(init);
 	g3x_SetDrawFunction(draw);
