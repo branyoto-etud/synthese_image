@@ -63,7 +63,7 @@ void Camera_setup(Cam* camera, double theta, double phi, double dist, G3Xpoint t
       p = g3x_ProdHMatPoint(camera->Md, p);
       G3Xvector v = g3x_SetVect(o, p);
       Rayon R = Cree_Rayon(p, v);
-      RayTracer(&R, objets, light, 1);
+      RayTracer(&R, objets, light, 3);
       /* Chessboard pattern if object too far */
       if (R.distance >= DBL_MAX-1) {
         R.color = ((x%4<2 && y%4<2) || (x%4>=2 && y%4>=2)? G3Xk_c : G3Xw_c);

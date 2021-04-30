@@ -31,7 +31,7 @@ static void Init_objets() {
   Objet *S1 = Cree_sphere_can(G3Xr, (Material){.5, .5, 0, 0, 0, 1}); 
   Objet *S2 = Cree_sphere_can(G3Xb, (Material){.2, .5, .5, .5, 0, 1}); 
   Objet *S3 = Cree_cube_can(G3Xg, (Material){.2, .5, .3, .5, .5, 1}); 
-  Objet *S4 = Cree_sphere_can(G3Xc, (Material){.2, .5, .3, .9, .7, 1}); 
+  Objet *S4 = Cree_sphere_can(G3Xc, (Material){.2, .5, .9, .9, .7, 1}); 
   Objet *L = Cree_sphere_can(G3Xw, (Material){.2, .5, 0, 0, 0.2, 1});
   Objet *M = Cree_sphere_can(G3Xm_a, (Material){.2, .5, .5, .7, 0, 1});
   rescale_objet(S1, .2, .2, .2);

@@ -54,14 +54,15 @@ G3Xcolor colorSum(G3Xcolor color1, G3Xcolor color2) {
   };
 }
 
-G3Xvector mulVect(G3Xvector V, double value) {
-  return (G3Xvector) { V.x * value, V.y * value, V.z * value };
+G3Xvector reflectRayon(G3Xvector vector, G3Xvector norm) {
+  /* symétrique du vecteur IL par rapport à la normale N */
+  return g3x_SubVect(g3x_mapscal3(norm, 2 * g3x_ProdScal(norm, vector)), vector);
 }
+
 
 void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
   G3Xpoint I; G3Xvector N;
   Objet* obj = objets;
-  int i;
 
   if (rec == 0) return;
   rec -= 1;
@@ -104,8 +105,7 @@ void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
   
   /* DEGRÉ 3 */
 
-  /* symétrique du vecteur IL par rapport à la normale N */
-  G3Xvector sym_w = g3x_SubVect(mulVect(N, 2 * prod_scal), w);
+  G3Xvector sym_w = reflectRayon(w, N);
 
   G3Xcolor shine = shadeColor(G3Xw, 
     R->objet->mat.shin * R->objet->mat.spec * 
@@ -116,23 +116,15 @@ void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
   R->color = colorSum(R->color, shine);
 
   /* vecteur réfléchi */
-
-  /*
-  for (i = 0; i < 1; i++) {
-    G3Xvector vr = g3x_AddVect(mulVect(N, 2 * g3x_ProdScal(R->direction, N)), R->direction);
-    Objet* objs = objets;
-
-    Rayon Rr = Cree_Rayon(I, vr);
-    do {
-      RayIntersectWith(&Rr, objs, &I, &N);
-    } while ((objs = objs->next) != objets);
-
-    Rr.color = Rr.objet->color;
-    R->color = colorSum(R->color, shadeColor(Rr.color, Rr.objet->mat.spec));
-    Draw_Rayon(&Rr);
-  }
-  */
+  Rayon refl = Cree_Rayon(I, reflectRayon(R->direction, N));
   
+  RayTracer(&refl, objets, L, rec);
+  R->color = colorSum(R->color, shadeColor(refl.color, R->objet->mat.spec));
+  
+  if (refl.color.r || refl.color.g || refl.color.b)
+    Draw_Rayon(&refl);
+
+
   if (RAYTRACER_DEG < 4) return;
 
 
@@ -153,7 +145,9 @@ void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
   T.color = T.objet->color;
   R->color = T.color;
 
-  Draw_Rayon(&T);
+  Rayon A = Cree_Rayon(J, T.direction);
+  A.color = G3Xw;
+  Draw_Rayon(&A);
 }
 
 void Draw_Rayon(Rayon *R) {
