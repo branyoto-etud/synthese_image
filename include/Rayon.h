@@ -2,9 +2,10 @@
 #define __RAYON
 
 #include <g3x.h>
+#include <math.h>
 #include "Objet.h"
 
-#define RAYTRACER_DEG 0
+#define RAYTRACER_DEG 4
 
 typedef struct {
   G3Xpoint origine;

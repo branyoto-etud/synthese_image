@@ -10,7 +10,7 @@ Cam    camera;
 Objet* objets = NULL;
 
 /* paramètres réglables de la Caméra : position, orientation, focale, résolution */
-double     cam_the=0.05, cam_phi=-1.20 /*PI/4.*/, cam_dis=1., cam_foc=4., cam_res=0.8;
+double     cam_the=-1.5/*0.05*/, cam_phi=1.5/*PI/4*/, cam_dis=1., cam_foc=4., cam_res=.4;
 G3Xpoint   cam_tar={0.,0.,0.};
 
 static void addObject(Objet* o) {
@@ -28,24 +28,28 @@ static void addObject(Objet* o) {
 }
 
 static void Init_objets() {
-  Objet *S1 = Cree_sphere_can(G3Xr, (Material){0.2, .5, 0, 0, 0, 1});
-  Objet *S2 = Cree_sphere_can(G3Xb, (Material){0.2, .5, 0, 0, 0, 1});
-  Objet *S3 = Cree_cube_can(G3Xg, (Material){0.2, .5, 0, 0, 0, 1});
-  Objet *L = Cree_sphere_can(G3Xw, (Material){0.2, .5, 0, 0, 0, 1});
-  Objet *M = Cree_sphere_can(G3Xm_a, (Material){0.2, .5, 0, 0, 0, 1});
-  rescale_objet(S1, 0.2, 0.2, 0.2);
-  rescale_objet(S2, 0.1, 0.1, 0.1);
-  rescale_objet(S3, 0.2, 0.2, 0.2);
-  rescale_objet(L, 0.05, 0.05, 0.05);
-  rescale_objet(M, 0.05, 0.05, 0.05);
+  Objet *S1 = Cree_sphere_can(G3Xr, (Material){.5, .5, 0, 0, 0, 1}); 
+  Objet *S2 = Cree_sphere_can(G3Xb, (Material){.2, .5, .5, .5, 0, 1}); 
+  Objet *S3 = Cree_cube_can(G3Xg, (Material){.2, .5, .3, .5, .5, 1}); 
+  Objet *S4 = Cree_sphere_can(G3Xc, (Material){.2, .5, .3, .9, .7, 1}); 
+  Objet *L = Cree_sphere_can(G3Xw, (Material){.2, .5, 0, 0, 0.2, 1});
+  Objet *M = Cree_sphere_can(G3Xm_a, (Material){.2, .5, .5, .7, 0, 1});
+  rescale_objet(S1, .2, .2, .2);
+  rescale_objet(S2, .1, .1, .1);
+  rescale_objet(S3, .2, .2, .2);
+  rescale_objet(S4, .3, .3, .3);
+  rescale_objet(L, .05, .05, .05);
+  rescale_objet(M, .05, .05, .05);
   translate_objet(S1, .5, .5, .5);
   translate_objet(S2, 0, 0, 0);
   translate_objet(S3, 0, 0, -.6);
-  translate_objet(L, 0, 0, 1);
-  translate_objet(M, 0, 0, 0.8);
+  translate_objet(S4, 0, -.5, 0);
+  translate_objet(L, .2, 0, 1);
+  translate_objet(M, 0, 0, .8);
   addObject(S1);
   addObject(S2);
   addObject(S3);
+  addObject(S4);
   addObject(L);
   addObject(M);
 }
