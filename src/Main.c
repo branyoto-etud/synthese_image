@@ -10,7 +10,8 @@ Cam    camera;
 Objet* objets = NULL;
 
 /* paramètres réglables de la Caméra : position, orientation, focale, résolution */
-double     cam_the=-1.5/*0.05*/, cam_phi=1.5/*PI/4*/, cam_dis=1., cam_foc=4., cam_res=.4;
+double     cam_the=.77/*0.05*/, cam_phi=1.5/*PI/4*/, cam_dis=2.5, cam_foc=4., cam_res=1.;
+double     n = 1;
 G3Xpoint   cam_tar={0.,0.,0.};
 
 static void addObject(Objet* o) {
@@ -28,12 +29,25 @@ static void addObject(Objet* o) {
 }
 
 static void Init_objets() {
-  Objet *S1 = Cree_sphere_can(G3Xr, (Material){.5, .5, 0, 0, 0, 1}); 
-  Objet *S2 = Cree_sphere_can(G3Xb, (Material){.2, .5, .5, .5, 0, 1}); 
-  Objet *S3 = Cree_cube_can(G3Xg, (Material){.2, .5, .3, .5, .5, 1}); 
-  Objet *S4 = Cree_sphere_can(G3Xc, (Material){.2, .5, .9, .9, .7, 1}); 
-  Objet *L = Cree_sphere_can(G3Xw, (Material){.2, .5, 0, 0, 0.2, 1});
-  Objet *M = Cree_sphere_can(G3Xm_a, (Material){.2, .5, .5, .7, 0, 1});
+  
+  Objet *Sphere = Cree_sphere_can(G3Xr,   (Material){.5, .5, 1, 1., .9, n});
+  rescale_objet(Sphere, .2,.2,.2);
+  translate_objet(Sphere, .1, 0, 0);
+  addObject(Sphere);
+
+  /*
+  Objet *Cube = Cree_cube_can(G3Xb,   (Material){.5, .5, 1, 1., .9, n});
+  rescale_objet(Cube, .2,.2,.2);
+  translate_objet(Cube, .1, 0, 0);
+  addObject(Cube);*/
+
+  /*
+  Objet *S1 = Cree_sphere_can(G3Xr,   (Material){.5, .5, 1, 1., .0, 1});
+  Objet *S2 = Cree_sphere_can(G3Xb,   (Material){.2, .5, 1, 1., .0, 1});
+  Objet *S3 = Cree_cube_can(  G3Xg,   (Material){.2, .5, 1, 1., .0, 1});
+  Objet *S4 = Cree_sphere_can(G3Xc,   (Material){.2, .5, 1, 1., .0, 1});
+  Objet *L  = Cree_sphere_can(G3Xw,   (Material){.2, .5, 1, 1., .0, 1});
+  Objet *M  = Cree_sphere_can(G3Xm_a, (Material){.2, .5, 1, 1., .0, 1});
   rescale_objet(S1, .2, .2, .2);
   rescale_objet(S2, .1, .1, .1);
   rescale_objet(S3, .2, .2, .2);
@@ -52,6 +66,7 @@ static void Init_objets() {
   addObject(S4);
   addObject(L);
   addObject(M);
+  */
 }
 
 
@@ -65,15 +80,18 @@ static void init(void)
   g3x_CreateScrollh_d("Th" ,&cam_the, -PI, +PI, 1.,"angle de vue (horizontal)");
 
   g3x_CreateScrollv_d("res",&cam_res, 0.0,1.0,1.,"résolution");
+  g3x_CreateScrollv_d("ind",&n,       1.0,2.5,1.,"indice");
 }
 
 /*! la fonction d'affichage !*/
 static void draw() {
+  objets->mat.n = n;
   Objet* o = objets;
   do {
     draw_object(o);
   } while ((o = o->next) != objets);
 
+  g3x_Material((G3Xcolor) {0,0,0,1}, .3,.5,.2,0.2,1);
   Camera_setup(&camera,cam_the,cam_phi, cam_dis,cam_tar, cam_foc, cam_res, objets);
   Draw_camera(&camera, cam_dis);
 }
