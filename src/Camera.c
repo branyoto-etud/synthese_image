@@ -61,7 +61,7 @@ void Camera_setup(Cam* camera, double theta, double phi, double dist, G3Xpoint t
   /* fill_pixmap(camera, objets, o); */
 }
 
-void fill_pixmap(Camera* camera, Objet* objets, G3Xpoint origine) {
+void fill_pixmap(Cam* camera, Objet* objets, G3Xpoint origine) {
   G3Xpoint light = (G3Xpoint) {0,0,1};  /* Light position */ /* Todo : Add controls */
 
   int x,y;                              /* indexes of the for loop */
