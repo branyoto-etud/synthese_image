@@ -36,21 +36,46 @@ void RayIntersectWith(Rayon *R, Objet* o, G3Xpoint *I, G3Xvector *N) {
   g3x_Normalize(N);
 }
 
+/*** Temporary ***/
+void RayIntersectWith2(Rayon *R, Objet* o, G3Xpoint *I, G3Xvector *N) {
+  G3Xpoint  A = g3x_ProdHMatPoint (o->Mi, R->origine  );
+  G3Xvector u = g3x_ProdHMatVector(o->Mi, R->direction);
+  g3x_Normalize(&u);
+  double t = 4*g3x_Dist(A, (G3Xpoint){0, 0, 0});
+  A = (G3Xpoint) {A.x + t * u.x, A.y + t * u.y, A.z + t * u.z};
+  u = (G3Xvector) {-u.x, -u.y, -u.z};
+  g3x_Normalize(&u);
+
+  G3Xpoint J;
+  G3Xvector M;
+  if (!o->inter(&J, &M, A, u)) return;
+
+  double d = g3x_SqrDist(g3x_ProdHMatPoint(o->Md, J), R->origine);
+  if (d >= R->distance) return;
+
+  R->objet    = o;
+  R->distance = d;
+
+  *I = g3x_ProdHMatPoint (o->Md, J);
+  *N = g3x_ProdHMatVector(o->Mn, M);
+  g3x_Normalize(N);
+}
+
 G3Xcolor shadeColor(G3Xcolor color, double value) {
-  return (G3Xcolor) { 
-    CLIP(0, color.r * value, 1.) , 
-    CLIP(0, color.g * value, 1.) , 
-    CLIP(0, color.b * value, 1.) , 
-    color.a 
+  return (G3Xcolor) {
+    CLIP(0, color.r * value, 1.) ,
+    CLIP(0, color.g * value, 1.) ,
+    CLIP(0, color.b * value, 1.) ,
+    color.a
   };
 }
 
 G3Xcolor colorSum(G3Xcolor color1, G3Xcolor color2) {
-  return (G3Xcolor) { 
-    CLIP(0, color1.r + color2.r, 1.) , 
-    CLIP(0, color1.g + color2.g, 1.) , 
-    CLIP(0, color1.b + color2.b, 1.) , 
-    CLIP(0, color1.a + color2.a, 1) 
+  return (G3Xcolor) {
+    CLIP(0, color1.r + color2.r, 1.) ,
+    CLIP(0, color1.g + color2.g, 1.) ,
+    CLIP(0, color1.b + color2.b, 1.) ,
+    CLIP(0, color1.a + color2.a, 1)
   };
 }
 
@@ -58,7 +83,13 @@ G3Xvector reflectRayon(G3Xvector vector, G3Xvector norm) {
   /* symétrique du vecteur IL par rapport à la normale N */
   return g3x_SubVect(g3x_mapscal3(norm, 2 * g3x_ProdScal(norm, vector)), vector);
 }
-
+G3Xvector VctTransmis(G3Xvector u, G3Xvector N, double Dn) {
+  double ps = g3x_ProdScal(u, N);
+  double a = (SQR(Dn) * (1 - SQR(ps)));
+  double s = a > 1 ? 0: sqrt(1 - a);
+  double c = s + (Dn * ps);
+  return g3x_AddVect(g3x_mapscal3(N, c), g3x_mapscal3(u, Dn));
+}
 
 void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
   G3Xpoint I; G3Xvector N;
@@ -82,10 +113,9 @@ void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
 
   /* On évalue la norme du vecteur entre l'intersection I et la source de lumière L */
   G3Xvector w = g3x_SetVect(I, L);
-  double prod_scal;
-
   g3x_Normalize(&w);
-  prod_scal = g3x_ProdScal(N, w);
+
+  double prod_scal = g3x_ProdScal(N, w);
 
   if (prod_scal <= 0) {
     if (RAYTRACER_DEG <= 1) {
@@ -102,52 +132,69 @@ void RayTracer(Rayon *R, Objet* objets, G3Xpoint L, int rec) {
   }
 
   if (RAYTRACER_DEG < 3) return;
-  
+
   /* DEGRÉ 3 */
 
   G3Xvector sym_w = reflectRayon(w, N);
 
-  G3Xcolor shine = shadeColor(G3Xw, 
-    R->objet->mat.shin * R->objet->mat.spec * 
-    MAX(0, pow( - g3x_ProdScal(R->direction, sym_w), (double) (1. / (1 - R->objet->mat.shin)) )) 
+  G3Xcolor shine = shadeColor(G3Xw,
+    R->objet->mat.shin * R->objet->mat.spec *
+    MAX(0, pow( - g3x_ProdScal(R->direction, sym_w), (double) (1. / (1 - R->objet->mat.shin)) ))
   );
 
 
   R->color = colorSum(R->color, shine);
 
   /* vecteur réfléchi */
-  Rayon refl = Cree_Rayon(I, reflectRayon(R->direction, N));
-  
+  G3Xvector refl_dir = g3x_SubVect(R->direction, g3x_mapscal3(N, 2 * g3x_ProdScal(N, R->direction)));
+  Rayon refl = Cree_Rayon(I, refl_dir);
+
   RayTracer(&refl, objets, L, rec);
-  R->color = colorSum(R->color, shadeColor(refl.color, R->objet->mat.spec));
-  
-  if (refl.color.r || refl.color.g || refl.color.b)
-    Draw_Rayon(&refl);
+  R->color = colorSum(R->color, shadeColor(refl.color, R->objet->mat.shin));
 
-
+  Draw_Rayon(R);
   if (RAYTRACER_DEG < 4) return;
-
-
-
 
   /* DEGRÉ 4 */
 
-  Rayon T = Cree_Rayon(I, R->direction);
-  G3Xpoint J; 
-  Objet* obj2 = objets;
+  /*
+  Rayon R1 = Cree_Rayon(I, R->direction);
+  R1.color = G3Xg;
+  R1.direction = N;
+  R1.color = G3Xk;
+  G3Xpoint J; G3Xvector M;
+  J = (G3Xpoint) {0,0,0};
+  M = (G3Xvector) {0,0,0};
+  R->distance = DBL_MAX;
+  RayIntersectWith2(R, objets, &J, &M);
 
-  do {
-    RayIntersectWith(&T, obj2, &J, &N);
-  } while ((obj2 = obj2->next) != objets);
+  Rayon R2 = Cree_Rayon(J, R->direction);
+  R2.color = G3Xb;
+  Draw_Rayon(&R2);
+  R2.direction = M;
+  R2.color = G3Xw;
+  Draw_Rayon(&R2);
+*/
+
+
+  G3Xvector ut = VctTransmis(R->direction, N, 1 / R->objet->mat.n);
+  Rayon T = Cree_Rayon(I, ut);
+  T.color = (G3Xcolor) {0, 1, 0, 0};
+  Draw_Rayon(&T);
+
+  G3Xpoint J; G3Xvector M;
+  RayIntersectWith2(&T, objets, &J, &M);
+
+  M = (G3Xvector) {-M.x,-M.y,-M.z};
+  G3Xvector vt = VctTransmis(T.direction, M, R->objet->mat.n / 1);
+  Rayon S = Cree_Rayon(J, vt);
+  S.color = (G3Xcolor) {0, 0, 1, 0};
+  Draw_Rayon(&S);
 
   if (T.objet == NULL) return;
 
   T.color = T.objet->color;
   R->color = T.color;
-
-  Rayon A = Cree_Rayon(J, T.direction);
-  A.color = G3Xw;
-  Draw_Rayon(&A);
 }
 
 void Draw_Rayon(Rayon *R) {
@@ -159,5 +206,10 @@ void Draw_Rayon(Rayon *R) {
                  R->origine.y+R->direction.y,
                  R->origine.z+R->direction.z);
     glEnd();                                                /* ferme la ligne         */
-  glEnable(GL_LIGHTING);                                    /* "rebranche" la lumière */
+    glPushMatrix();
+      glMatrixMode(GL_MODELVIEW);
+      glTranslatef(R->origine.x, R->origine.y, R->origine.z);
+      glutSolidSphere(.01,40,40);
+    glPopMatrix();
+  glEnable(GL_LIGHTING);
 }

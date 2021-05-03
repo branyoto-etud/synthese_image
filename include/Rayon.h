@@ -5,7 +5,7 @@
 #include <math.h>
 #include "Objet.h"
 
-#define RAYTRACER_DEG 3
+#define RAYTRACER_DEG 4
 
 typedef struct {
   G3Xpoint origine;
