@@ -52,5 +52,6 @@ Mkfile.old
 dkms.conf
 
 # Generated files
-bin/*
+bin
 .idea
+cmake-build-debug

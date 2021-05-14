@@ -2,123 +2,66 @@
 #define WHEIGHT 1000
 
 #include <g3x.h>
-#include "Camera.h"
-#include "Objet.h"
+#include <stdlib.h>
+#include "../include/Camera.h"
+#include "../include/Object.h"
+#include "../include/CameraConfig.h"
 
-/* la Caméra globale */
-Cam    camera;
-Objet* objets = NULL;
-
-/* paramètres réglables de la Caméra : position, orientation, focale, résolution */
-double     cam_the=.77/*0.05*/, cam_phi=1.5/*PI/4*/, cam_dis=2.5, cam_foc=4., cam_res=1.;
-double     n = 1;
-G3Xpoint   cam_tar={0.,0.,0.};
-
-static void addObject(Objet* o) {
-  Objet* last = objets;
-
-  if (last == NULL) {
-    objets = o;
-  } else {
-    while (last->next != objets) {
-      last = last->next;
-    }
-    last->next = o;
-  }
-  o->next = objets;
-}
+Object *objects = NULL;
+CameraConfig *config;
+Cam camera;
 
 static void Init_objets() {
-  
-  Objet *Sphere = Cree_sphere_can(G3Xr,   (Material){.5, .5, 1, 1., .9, n});
-  rescale_objet(Sphere, .2,.2,.2);
-  translate_objet(Sphere, .1, 0, 0);
-  addObject(Sphere);
-
-  /*
-  Objet *Cube = Cree_cube_can(G3Xb,   (Material){.5, .5, 1, 1., .9, n});
-  rescale_objet(Cube, .2,.2,.2);
-  translate_objet(Cube, .1, 0, 0);
-  addObject(Cube);*/
-
-  /*
-  Objet *S1 = Cree_sphere_can(G3Xr,   (Material){.5, .5, 1, 1., .0, 1});
-  Objet *S2 = Cree_sphere_can(G3Xb,   (Material){.2, .5, 1, 1., .0, 1});
-  Objet *S3 = Cree_cube_can(  G3Xg,   (Material){.2, .5, 1, 1., .0, 1});
-  Objet *S4 = Cree_sphere_can(G3Xc,   (Material){.2, .5, 1, 1., .0, 1});
-  Objet *L  = Cree_sphere_can(G3Xw,   (Material){.2, .5, 1, 1., .0, 1});
-  Objet *M  = Cree_sphere_can(G3Xm_a, (Material){.2, .5, 1, 1., .0, 1});
-  rescale_objet(S1, .2, .2, .2);
-  rescale_objet(S2, .1, .1, .1);
-  rescale_objet(S3, .2, .2, .2);
-  rescale_objet(S4, .3, .3, .3);
-  rescale_objet(L, .05, .05, .05);
-  rescale_objet(M, .05, .05, .05);
-  translate_objet(S1, .5, .5, .5);
-  translate_objet(S2, 0, 0, 0);
-  translate_objet(S3, 0, 0, -.6);
-  translate_objet(S4, 0, -.5, 0);
-  translate_objet(L, .2, 0, 1);
-  translate_objet(M, 0, 0, .8);
-  addObject(S1);
-  addObject(S2);
-  addObject(S3);
-  addObject(S4);
-  addObject(L);
-  addObject(M);
-  */
+    Object *sphere = Cree_sphere_can(G3Xr, (Material) {.5, .5, .5, 0.8, .3, 1.2});
+    Object *s2 = Cree_sphere_can(G3Xb, (Material) {.5, .5, .5, 0.8, .9, 1.2});
+    rescale_objet(sphere, .2, .2, .2);
+    rescale_objet(s2, .2, .2, .2);
+    translate_objet(sphere, .1, 0, 0);
+    translate_objet(s2, .1, 0.5, 1.);
+    queue_object(&objects, sphere);
+    queue_object(&objects, s2);
 }
 
+static void init(void) {
+    config = default_config();
+    camera = Cree_camera_can();
+    Init_objets();
+    g3x_CreateScrollh_d("dF", &(config->focal), 0.0, 30., 1., "distance focale");
+    g3x_CreateScrollh_d("Di", &(config->distance), 0.0, 30., 1., "distance de vue");
+    g3x_CreateScrollh_d("Ph", &(config->phi), -PI, +PI, 1., "angle de vue (vertical)");
+    g3x_CreateScrollh_d("Th", &(config->theta), -PI, +PI, 1., "angle de vue (horizontal)");
 
-static void init(void)
-{
-  camera  = Cree_camera_can();
-  Init_objets();
-  g3x_CreateScrollh_d("dF" ,&cam_foc, 0.0, 30., 1.,"distance focale");
-  g3x_CreateScrollh_d("Di" ,&cam_dis, 0.0, 30., 1.,"distance de vue");
-  g3x_CreateScrollh_d("Ph" ,&cam_phi, -PI, +PI, 1.,"angle de vue (vertical)");
-  g3x_CreateScrollh_d("Th" ,&cam_the, -PI, +PI, 1.,"angle de vue (horizontal)");
-
-  g3x_CreateScrollv_d("res",&cam_res, 0.0,1.0,1.,"résolution");
-  g3x_CreateScrollv_d("ind",&n,       1.0,2.5,1.,"indice");
+    g3x_CreateScrollv_d("res", &(config->resolution), 0.0, 1.0, 1., "résolution");
 }
 
-/*! la fonction d'affichage !*/
 static void draw() {
-  objets->mat.n = n;
-  Objet* o = objets;
-  do {
-    draw_object(o);
-  } while ((o = o->next) != objets);
-
-  g3x_Material((G3Xcolor) {0,0,0,1}, .3,.5,.2,0.2,1);
-  Camera_setup(&camera,cam_the,cam_phi, cam_dis,cam_tar, cam_foc, cam_res, objets);
-  Draw_camera(&camera, cam_dis);
+    draw_objects(objects);
+    /* g3x_Material((G3Xcolor) {0,0,0,1}, .3,.5,.2,0.2,1); */
+    Camera_setup(&camera, config, objects);
+    Draw_camera(&camera, config->distance);
 }
 
-/* fonction de sortie */
-static void quit()
-{
-  /* TODO : Free les objets */
-  free(camera.col); camera.col=NULL;
+static void quit() {
+    free_camera(&camera);
+    free_objets(&objects);
+    free(config);
 }
 
 /***************************************************************************/
 /*                                                                         */
 /***************************************************************************/
-int main(int argc, char **argv)
-{
-	g3x_InitWindow(*argv,WWIDTH,WHEIGHT);
-  g3x_SetBkgCol(0.3);
+int main(int argc, char **argv) {
+    g3x_InitWindow(*argv, WWIDTH, WHEIGHT);
+    g3x_SetBkgCol(0.3);
 
-  g3x_SetPerspective(40.,100.,1.);
+    g3x_SetPerspective(40., 100., 1.);
 
-  g3x_SetCameraSpheric(0.,PI/4.,5.,(G3Xpoint){0.,0.,0.});
-  g3x_SetLightCartesian((G3Xpoint) {0, 0, 1});
+    g3x_SetCameraSpheric(-1.16, 0.8, 5., (G3Xpoint) {0., 0., 0.});
+    g3x_SetLightCartesian((G3Xpoint) {0, 0, 1});
 
-	g3x_SetInitFunction(init);
-	g3x_SetDrawFunction(draw);
-	g3x_SetExitFunction(quit);
+    g3x_SetInitFunction(init);
+    g3x_SetDrawFunction(draw);
+    g3x_SetExitFunction(quit);
 
-  return g3x_MainStart();
+    return g3x_MainStart();
 }

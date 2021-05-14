@@ -2,16 +2,18 @@ CC = gcc
 CFLAGS = -ansi -Wall
 LDFLAGS = -lm -lrt $(libG3X)
 EXEC = Main
-OBJ = Main.o Camera.o Objet.o Rayon.o
+OBJ = Main.o Camera.o Object.o Rayon.o CameraConfig.o Utils.o
 inc = -I./include $(incG3X)
 
 $(EXEC): $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-Main.o: ./src/Main.c ./include/Camera.h
-Camera.o: ./src/Camera.c ./include/Camera.h
-Objet.o: ./src/Objet.c ./include/Objet.h
-Rayon.o: ./src/Rayon.c ./include/Rayon.h ./include/Objet.h
+Object.o: ./src/Object.c ./include/Object.h
+Utils.o: ./src/Utils.c ./include/Utils.h
+CameraConfig.o: ./src/CameraConfig.c ./include/CameraConfig.h
+Rayon.o: ./src/Rayon.c ./include/Rayon.h ./include/Object.h ./include/Utils.h
+Main.o: ./src/Main.c ./include/Camera.h ./include/Object.h ./include/CameraConfig.h
+Camera.o: ./src/Camera.c ./include/Camera.h ./include/Object.h ./include/Rayon.h ./include/CameraConfig.h
 
 %.o: ./src/%.c
 	$(CC) -c $< $(CFLAGS) $(inc)
